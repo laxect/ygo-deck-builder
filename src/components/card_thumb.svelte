@@ -43,23 +43,28 @@
 </script>
 
 {#if id}
-   <img
-       style="margin:2px;"
+   <div
+       style="margin:2px; display: inline-block; position: relative;"
        draggable="true"
        onmouseover={onhover}
        onfocus={onhover}
        ondragstart={onDragStart}
-       onclick={()=>{onhover();showMobileInfo();}}
+       onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { onhover(); showMobileInfo(); } }}
        oncontextmenu={adjustCardCount}
-       height="100%"
-       src={thumbImage(id)}
-       alt="yugioh card {id}"
-   />
-   {#if limitNum > 0}
-       <div class="overlay">{limitNum}</div>
-   {:else if limitNum === 0}
-       <div class="ban-overlay"></div>
-   {/if}
+       role="button"
+       tabindex="0"
+   >
+       <img
+           height="100%"
+           src={thumbImage(id)}
+           alt="yugioh card {id}"
+       />
+       {#if limitNum > 0}
+           <div class="overlay">{limitNum}</div>
+       {:else if limitNum === 0}
+           <div class="ban-overlay"></div>
+       {/if}
+   </div>
 {/if}
 
 <style>

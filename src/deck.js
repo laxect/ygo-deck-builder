@@ -1,9 +1,18 @@
 import { writable } from "svelte/store";
 import { parseYdke } from './utils';
 import { getCardDb, getAltId, cardLimit, cardGenesysPoint } from './card_db';
+import { getAllDecks, saveDeck as saveDeckToStorage } from './storage';
 
-let deck = writable({main: [], extra: [], side: []});
-let deckState = {main: [], extra: [], side: []};
+let deck = writable({ main: [], extra: [], side: [] });
+let deckState = { main: [], extra: [], side: [] };
+
+let currentDeckName = writable(null);
+let currentDeckNameState = null;
+
+function setCurrentDeckName(name) {
+    currentDeckNameState = name;
+    currentDeckName.set(name);
+}
 
 let defaultFormat = 'none';
 let format = writable(defaultFormat);
@@ -36,7 +45,7 @@ function groupAndSort(arr) {
     const seen = {};
     const count = {};
     const uniqueList = [];
-    
+
     for (const num of arr) {
         if (!(num in seen)) {
             seen[num] = true;
@@ -44,7 +53,7 @@ function groupAndSort(arr) {
         }
         count[num] = (count[num] || 0) + 1;
     }
-    
+
     const result = [];
     for (const num of uniqueList) {
         const times = count[num];
@@ -76,10 +85,10 @@ function setDeck(d) {
     d.main = groupAndSort(d.main);
 
     d.side = sanitizeDeck(cardCnt, d.side);
-    d.side= groupAndSort(d.side);
+    d.side = groupAndSort(d.side);
 
     d.extra = sanitizeDeck(cardCnt, d.extra);
-    d.extra= groupAndSort(d.extra);
+    d.extra = groupAndSort(d.extra);
 
     if (formatState === 'genesys') {
         d.point = genesysPoint(d);
@@ -87,7 +96,6 @@ function setDeck(d) {
 
     deckState = d;
     deck.set(d);
-    localStorage.setItem('cachedDeck', JSON.stringify(d));
 };
 
 function canAdd(d, id) {
@@ -165,7 +173,7 @@ let deckOps = {
         if (!cardDb[id].isExtra) return;
         let d = deckState;
         if (canAdd(d, id)) {
-            if (targetIdx === -1) 
+            if (targetIdx === -1)
                 d.extra.push(id);
             else if (d.extra.includes(id)) {
                 d.extra.push(id);
@@ -181,11 +189,11 @@ let deckOps = {
         if (cardDb[id].isExtra) return;
         let d = deckState;
         if (canAdd(d, id)) {
-            if (targetIdx === -1) 
+            if (targetIdx === -1)
                 d.main.push(id);
             else if (d.main.includes(id)) {
                 d.main.push(id);
-                d.main= groupAndSort(d.main);
+                d.main = groupAndSort(d.main);
             } else {
                 d.main.splice(targetIdx, 0, id);
             }
@@ -195,11 +203,11 @@ let deckOps = {
     "add2side": (id, targetIdx) => {
         let d = deckState;
         if (canAdd(d, id)) {
-            if (targetIdx === -1) 
+            if (targetIdx === -1)
                 d.side.push(id);
             else if (d.side.includes(id)) {
                 d.side.push(id);
-                d.side= groupAndSort(d.side);
+                d.side = groupAndSort(d.side);
             } else {
                 d.side.splice(targetIdx, 0, id);
             }
@@ -208,21 +216,55 @@ let deckOps = {
     }
 };
 
+function loadDeck(name, version) {
+    const decks = getAllDecks();
+    const deckData = decks[name];
+    if (deckData) {
+        const versionIndex = version === undefined ? deckData.current : version;
+        const deckToLoad = deckData.versions[versionIndex].deck;
+        setDeck(deckToLoad);
+        setCurrentDeckName(name);
+    }
+}
+
+function saveCurrentDeck(name, notes = '') {
+    const deckToSave = { ...deckState };
+    saveDeckToStorage(name, deckToSave, { format: formatState, notes });
+    setCurrentDeckName(name);
+}
+
 function initDeck() {
+    const DEFAULT_DECK_NAME = 'Default';
+
     let url = window.location.href.split('#');
     if (url.length === 2) {
         let deck = parseYdke(url[1]);
-        if (deck.main.length > 0 || deck.extra.length > 0 || deck.extra.length > 0) {
+        if (deck.main.length > 0 || deck.extra.length > 0 || deck.side.length > 0) {
             setDeck(deck);
+            // Save the imported deck to Default deck
+            saveCurrentDeck(DEFAULT_DECK_NAME, 'Imported from URL');
             window.location.href = url[0];
             return;
         }
     }
-    let cachedDeck = localStorage.getItem('cachedDeck');
-    if (cachedDeck !== null) {
-        cachedDeck = JSON.parse(cachedDeck); 
-        setDeck(cachedDeck)
+
+    const decks = getAllDecks();
+    const deckNames = Object.keys(decks);
+
+    // Load the most recently edited deck if any decks exist
+    if (deckNames.length > 0) {
+        const lastDeckName = deckNames.reduce((a, b) => {
+            const aTimestamp = decks[a].versions[decks[a].current].timestamp;
+            const bTimestamp = decks[b].versions[decks[b].current].timestamp;
+            return aTimestamp > bTimestamp ? a : b;
+        });
+        loadDeck(lastDeckName);
+    } else {
+        // Only create Default deck when no decks exist
+        setDeck({ main: [], extra: [], side: [] });
+        saveCurrentDeck(DEFAULT_DECK_NAME, 'Auto-created default deck');
     }
+
     let cachedFormat = localStorage.getItem('format');
     if (cachedFormat !== null) {
         setFormat(cachedFormat);
@@ -230,19 +272,23 @@ function initDeck() {
 }
 
 function setFormat(newFormat) {
-     localStorage.setItem('format', newFormat);
-     formatState = newFormat;
-     format.set(newFormat);
-     setDeck(deckState);
+    localStorage.setItem('format', newFormat);
+    formatState = newFormat;
+    format.set(newFormat);
+    setDeck(deckState);
 }
 
 export {
     deck,
     format,
     formatState,
+    currentDeckName,
     setFormat,
     setDeck,
     deckOps,
     initDeck,
+    loadDeck,
+    saveCurrentDeck,
+    setCurrentDeckName,
 };
 

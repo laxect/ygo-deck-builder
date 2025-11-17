@@ -26,3 +26,8 @@ dist-ssr
 data/cards.json
 data/card_db*
 deploy.sh
+.aider*
+
+# Nix
+result*
+.direnv
