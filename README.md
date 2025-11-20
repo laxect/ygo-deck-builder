@@ -9,6 +9,3 @@ Demo：[raye.mistivia.com/ygodeck](https://raye.mistivia.com/ygodeck/#o6lXBaOpVw
 ## Screenshot
 
 ![image](https://oss.nebula.moe/shared-files/2025/03/13/e758a78eab/ygodeckbuilder-screenshot.png)
-
-
-

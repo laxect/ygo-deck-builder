@@ -26,6 +26,11 @@
 
         treefmt = {
           projectRootFile = "flake.nix";
+
+          settings = {
+            excludes = [ "*.json" ];
+          };
+
           programs = {
             nixpkgs-fmt.enable = true;
             prettier.enable = true;

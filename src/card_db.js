@@ -1,75 +1,75 @@
 import ocgBanList from "./ocg_banlist.json";
 import tcgBanList from "./tcg_banlist.json";
-import cnocgBanList from './cnocg_banlist.json';
-import genesysBanList from './genesys_banlist.json';
-import mdBanList from './md_banlist.json';
-import genesysPoint from './genesys_point.json';
+import cnocgBanList from "./cnocg_banlist.json";
+import genesysBanList from "./genesys_banlist.json";
+import mdBanList from "./md_banlist.json";
+import genesysPoint from "./genesys_point.json";
 
 let cardDb = {};
 let altId = {};
 let banList = {
-    none: {
-        ban: [],
-        limit: [],
-        semiLimit: [],
-    },
-    ocg: ocgBanList,
-    cnocg: cnocgBanList,
-    md: mdBanList,
-    tcg: tcgBanList,
-    genesys: genesysBanList,
+  none: {
+    ban: [],
+    limit: [],
+    semiLimit: [],
+  },
+  ocg: ocgBanList,
+  cnocg: cnocgBanList,
+  md: mdBanList,
+  tcg: tcgBanList,
+  genesys: genesysBanList,
 };
 
 function cardGenesysPoint(id) {
-    if (genesysPoint[id] === undefined) return 0;
-    return genesysPoint[id];
+  if (genesysPoint[id] === undefined) return 0;
+  return genesysPoint[id];
 }
 
 function cornerMark(id, env) {
-    if (env !== 'genesys') {
-        let lst = banList[env];
-        if (lst.ban.includes(id)) return 0;
-        if (lst.limit.includes(id)) return 1;
-        if (lst.semiLimit.includes(id)) return 2;
-        return -1;
-    }
-    let lst = banList[env];
-    if (lst.ban.includes(id)) return 0;
-    let point = cardGenesysPoint(id);
-    if (point === 0) return -1;
-    return point;
-}
-
-function cardLimit(id, env) {
+  if (env !== "genesys") {
     let lst = banList[env];
     if (lst.ban.includes(id)) return 0;
     if (lst.limit.includes(id)) return 1;
     if (lst.semiLimit.includes(id)) return 2;
-    return 3;
+    return -1;
+  }
+  let lst = banList[env];
+  if (lst.ban.includes(id)) return 0;
+  let point = cardGenesysPoint(id);
+  if (point === 0) return -1;
+  return point;
+}
+
+function cardLimit(id, env) {
+  let lst = banList[env];
+  if (lst.ban.includes(id)) return 0;
+  if (lst.limit.includes(id)) return 1;
+  if (lst.semiLimit.includes(id)) return 2;
+  return 3;
 }
 
 function setCardDb(d) {
-    cardDb = d;
+  cardDb = d;
 }
 
 function getCardDb() {
-    return cardDb;
+  return cardDb;
 }
 
 function getAltId() {
-    return altId;
+  return altId;
 }
 
 function setAltId(x) {
-    altId = x;
+  altId = x;
 }
 
 export {
-    getCardDb,
-    setCardDb,
-    getAltId,
-    setAltId,
-    cardLimit,
-    cardGenesysPoint,
-    cornerMark,
+  getCardDb,
+  setCardDb,
+  getAltId,
+  setAltId,
+  cardLimit,
+  cardGenesysPoint,
+  cornerMark,
 };
