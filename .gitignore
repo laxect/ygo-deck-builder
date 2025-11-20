@@ -31,3 +31,6 @@ deploy.sh
 # Nix
 result*
 .direnv
+
+# Firebase
+.firebase
