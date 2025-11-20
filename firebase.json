@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "ygo-decks-builder",
     "public": "dist",
     "ignore": [
       "firebase.json",
