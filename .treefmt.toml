@@ -1,0 +1,8 @@
+[formatter.prettier]
+command = "prettier"
+options = ["--write"]
+includes = ["*.js", "*.ts", "*.json", "*.md", "*.html", "*.css", "*.svelte"]
+
+[formatter.nixpkgs-fmt]
+command = "nixpkgs-fmt"
+includes = ["*.nix"]
