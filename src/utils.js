@@ -126,6 +126,9 @@ async function generateDeckImage(deckElement) {
 
 function downloadCanvasAsImage(canvas) {
   canvas.toBlob((blob) => {
+    if (!blob) {
+      throw new Error("Failed to create image blob");
+    }
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;

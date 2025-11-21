@@ -79,11 +79,11 @@
             // Try to copy to clipboard first
             try {
                 await copyCanvasToClipboard(canvas);
-                alert($currentTranslations.shareLinkCopied);
+                alert($currentTranslations.shareImageCopied);
             } catch (clipboardErr) {
                 // If clipboard fails, download the image instead
                 downloadCanvasAsImage(canvas);
-                alert($currentTranslations.shareLinkCopied);
+                alert($currentTranslations.shareImageCopied);
             }
         } catch (err) {
             console.error("Error generating deck image:", err);
