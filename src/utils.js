@@ -113,6 +113,60 @@ function cardImageUrl(id) {
   );
 }
 
+async function generateDeckImage(deckElement) {
+  const html2canvas = (await import("html2canvas")).default;
+  const canvas = await html2canvas(deckElement, {
+    backgroundColor: "#fafafa",
+    scale: 2,
+    logging: false,
+    useCORS: true,
+  });
+  return canvas;
+}
+
+async function downloadCanvasAsImage(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Failed to create image blob"));
+        return;
+      }
+      try {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `ygodeck_${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}
+
+async function copyCanvasToClipboard(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(async (blob) => {
+      if (!blob) {
+        reject(new Error("Failed to create image blob"));
+        return;
+      }
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ "image/png": blob }),
+        ]);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}
+
 export {
   parseYdk,
   genYdk,
@@ -120,4 +174,7 @@ export {
   genYdke,
   downloadStringAsFile,
   cardImageUrl,
+  generateDeckImage,
+  downloadCanvasAsImage,
+  copyCanvasToClipboard,
 };

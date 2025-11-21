@@ -37,6 +37,7 @@ const translations = {
     // Alert messages
     ydkCopied: "YDK卡组码已复制到剪贴板",
     shareLinkCopied: "分享链接已复制到剪贴板",
+    shareImageCopied: "卡组图片已复制/下载",
     failed: "失败！",
 
     // Loading
@@ -134,6 +135,7 @@ const translations = {
     // Alert messages
     ydkCopied: "YDK deck code copied to clipboard",
     shareLinkCopied: "Share link copied to clipboard",
+    shareImageCopied: "Deck image copied/downloaded",
     failed: "Failed!",
 
     // Loading
@@ -231,6 +233,7 @@ const translations = {
     // Alert messages
     ydkCopied: "YDKデッキコードをクリップボードにコピーしました",
     shareLinkCopied: "シェアリンクをクリップボードにコピーしました",
+    shareImageCopied: "デッキ画像をコピー/ダウンロードしました",
     failed: "失敗！",
 
     // Loading
