@@ -12,11 +12,12 @@
         currentDeckName,
     } from "../deck";
     import { cornerMark } from "../card_db";
-    import { parseYdk, genYdk, genYdke, downloadStringAsFile } from "../utils";
+    import { parseYdk, genYdk, genYdke, downloadStringAsFile, generateDeckImage, downloadCanvasAsImage, copyCanvasToClipboard } from "../utils";
     import { language, setLanguage, currentTranslations } from "../language";
 
     let fileInput;
     let viewMode = "deck"; // 'deck' or 'manager'
+    let deckSectionElement;
 
     function openDeck() {
         fileInput.click();
@@ -66,18 +67,28 @@
             });
     }
 
-    function shareDeck() {
-        let url = window.location.href;
-        url = url.split("#")[0];
-        url = url + "#" + genYdke($deck);
-        navigator.clipboard
-            .writeText(url)
-            .then(() => {
+    async function shareDeck() {
+        if (!deckSectionElement) {
+            alert($currentTranslations.failed);
+            return;
+        }
+        
+        try {
+            const canvas = await generateDeckImage(deckSectionElement);
+            
+            // Try to copy to clipboard first
+            try {
+                await copyCanvasToClipboard(canvas);
                 alert($currentTranslations.shareLinkCopied);
-            })
-            .catch((err) => {
-                alert($currentTranslations.failed);
-            });
+            } catch (clipboardErr) {
+                // If clipboard fails, download the image instead
+                downloadCanvasAsImage(canvas);
+                alert($currentTranslations.shareLinkCopied);
+            }
+        } catch (err) {
+            console.error("Error generating deck image:", err);
+            alert($currentTranslations.failed);
+        }
     }
 
     function onDrop(to, event, targetIdx) {
@@ -187,7 +198,7 @@
             </div>
         </div>
 
-        <div class="deck-section">
+        <div class="deck-section" bind:this={deckSectionElement}>
             <div class="deck-group">
                 <h3>
                     {$currentTranslations.mainDeck}
