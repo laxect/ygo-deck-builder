@@ -124,25 +124,37 @@ async function generateDeckImage(deckElement) {
   return canvas;
 }
 
-function downloadCanvasAsImage(canvas) {
-  canvas.toBlob((blob) => {
-    if (!blob) {
-      throw new Error("Failed to create image blob");
-    }
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `ygodeck_${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+async function downloadCanvasAsImage(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Failed to create image blob"));
+        return;
+      }
+      try {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `ygodeck_${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
+    });
   });
 }
 
 async function copyCanvasToClipboard(canvas) {
   return new Promise((resolve, reject) => {
     canvas.toBlob(async (blob) => {
+      if (!blob) {
+        reject(new Error("Failed to create image blob"));
+        return;
+      }
       try {
         await navigator.clipboard.write([
           new ClipboardItem({ "image/png": blob }),

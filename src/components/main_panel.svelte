@@ -82,7 +82,7 @@
                 alert($currentTranslations.shareImageCopied);
             } catch (clipboardErr) {
                 // If clipboard fails, download the image instead
-                downloadCanvasAsImage(canvas);
+                await downloadCanvasAsImage(canvas);
                 alert($currentTranslations.shareImageCopied);
             }
         } catch (err) {
